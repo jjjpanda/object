@@ -1,0 +1,21 @@
+{
+  "name": "object",
+  "version": "1.0.0",
+  "description": "object detection and webhook alerts using tensorflow-js coco-ssd",
+  "main": "./lib/index.js",
+  "bin": {
+    "object": "./bin/object.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jjjpanda/object.git"
+  },
+  "author": "jjjpanda",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "chalk": "^4.1.2",
+    "@tensorflow-models/coco-ssd": "^2.2.2",
+    "@tensorflow/tfjs-node": "^3.11.0"
+  }
+}
