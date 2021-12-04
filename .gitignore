@@ -1,2 +1,5 @@
 node_modules
 object.config.js
+*.jpg
+*.png
+*.bmp
