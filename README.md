@@ -20,7 +20,13 @@ module.exports = [
 
 2. Start object
 
-⚠️ This may change. For the better. ⚠️
+Keep it simple and use the included executables in the [dist](dist) folder. For example, on Windows:
 ```
+> object-win.exe
+```
+
+Or you could use the npm bin command... 
+```
+> npm install --include=dev
 > npx object 
 ```
