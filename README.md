@@ -3,7 +3,7 @@ object detection and webhook alerts using tensorflow-js coco-ssd of ip cameras
 
 ## Quick Start
 
-1. Set up config
+1. Set up object.config.js file
 ```
 module.exports = [
     ...
@@ -20,9 +20,15 @@ module.exports = [
 
 2. Start object
 
-Keep it simple and use the included executables in the [dist](dist) folder. For example, on Windows:
+Keep it simple and use the included executables in the [dist](dist) folder. Add the executable to your path system variable for ease of use. And then just... run it. For example, on Windows:
 ```
 > object-win.exe
+```
+
+You can also specify the location of the config file:
+```
+> object-win.exe C:\Users\user\object.config.js
+> object-win.exe ../../object.config.js
 ```
 
 Or you could use the npm bin command... 
