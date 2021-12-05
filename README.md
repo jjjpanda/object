@@ -9,8 +9,10 @@ module.exports = [
     ...
     {
         name: "name of input",
-
         inputUrl: "url of RTSP/HTTP stream",
+
+        //leave blank if you want
+        alertUrl: 'webhook url',
 
         //how many frames to check... per second (defaults to 1)
         fps: 1, 
@@ -33,10 +35,9 @@ module.exports = [
         //how much the probability of existence should decay per second, range 0-1 (defaults to 0.9)
         probabilityOfExistenceDecay: 0.9,
 
-        //absolute file path to an image that will display Jimp/pixelchange and will be continuously overridden
+        //absolute file path to an image that will display Jimp/pixelchange difference and will be continuously overridden
+        //leave blank if you don't want a difference image
         differenceImagePath: "diff.jpg", 
-
-        alertUrl: 'webhook url'
     }
     ...
 ]
