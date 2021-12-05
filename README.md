@@ -9,9 +9,33 @@ module.exports = [
     ...
     {
         name: "name of input",
+
         inputUrl: "url of RTSP/HTTP stream",
-        fps: 1 //how many frames to check... per second (defaults to 1),
-        differenceImagePath: "diff.jpg" //absolute file path to an image that will display Jimp/pixelchange and will be continuously overridden,
+
+        //how many frames to check... per second (defaults to 1)
+        fps: 1, 
+
+        //minimum confidence to warrant a message to webhook about an object, range 0-1 (defaults to 0.8)
+        minimumObjectConfidence: 0.8,
+
+        //threshold to detect changed pixels, range 0-1 (defaults to 0.1)
+        pixelThreshold: 0.1, 
+
+        //minimum pixel percentage change to warrant object detection to set off, range 0-1 (defaults to 0.01)
+        pixelChangePercentTolerance: 0.01, 
+
+        //size change tolerance to identify change in detected object (defaults to 0.1)
+        sizeTolerance: 0.1,
+
+        //position change tolerance to identify change in detected object (defaults to 0.1)
+        positionTolerance: 0.1,
+
+        //how much the probability of existence should decay per second, range 0-1 (defaults to 0.9)
+        probabilityOfExistenceDecay: 0.9,
+
+        //absolute file path to an image that will display Jimp/pixelchange and will be continuously overridden
+        differenceImagePath: "diff.jpg", 
+
         alertUrl: 'webhook url'
     }
     ...
