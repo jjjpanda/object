@@ -1,6 +1,6 @@
 {
   "name": "object",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "object detection and webhook alerts using tensorflow-js coco-ssd",
   "main": "./lib/index.js",
   "bin": {
@@ -8,7 +8,8 @@
   },
   "scripts": {
     "prebuild": "npm install --include=dev",
-    "build": "npx pkg . -t node12-linux,node12-macos,node12-win -o dist/object"
+    "build": "npx pkg . -t node12-linux,node12-macos,node12-win -o dist/object",
+    "postbuild": "npm prune --production && npm i --production --package-lock-only && npm shrinkwrap"
   },
   "repository": {
     "type": "git",
