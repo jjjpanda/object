@@ -1,6 +1,6 @@
 {
   "name": "object",
-  "version": "1.1.2",
+  "version": "2.0.0",
   "description": "object detection and webhook alerts using tensorflow-js coco-ssd",
   "main": "./lib/index.js",
   "bin": {
@@ -38,11 +38,9 @@
     "@tensorflow-models/coco-ssd": "^2.2.2",
     "@tensorflow/tfjs-node": "^3.11.0",
     "axios": "^0.24.0",
+    "dotenv": "^10.0.0",
     "form-data": "^4.0.0",
     "jimp": "^0.16.1",
     "pkg": "^5.5.1"
-  },
-  "dependencies": {
-    "dotenv": "^10.0.0"
   }
 }
