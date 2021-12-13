@@ -1,22 +1,21 @@
 {
   "name": "object",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "object detection and webhook alerts using tensorflow-js coco-ssd",
   "main": "./lib/index.js",
   "bin": {
     "object": "./bin/object.js"
   },
   "engines": {
-    "npm": "^6.14.4 || ^8.2.0",
-    "node": ">=10.0.0 <15.0.0"
+    "npm": ">=7.0.0",
+    "node": ">=14.0.0 <17.0.0"
   },
   "scripts": {
-    "prebuild-linux": "npm install --development",
-    "build-linux": "npx pkg . --compress Brotli -t node12-linux -o ./dist/object-linux",
-    "postbuild-linux": "npm i --production --package-lock-only && npm shrinkwrap",
-    "prebuild-win": "npm install --development",
-    "build-win": "npx pkg . --compress Brotli -t node12-win -o ./dist/object-win.exe",
-    "postbuild-win": "npm i --production --package-lock-only && npm shrinkwrap"
+    "prebuild": "npm uninstall @tensorflow/tfjs-node && npm install -D @tensorflow/tfjs-node@3.11.0 && npm install --development",
+    "build": "pkg . --compress Brotli -t node12-linux",
+    "postbuild": "npm i --production --package-lock-only && npm shrinkwrap",
+    "build-linux": "npm run build -- -o ./dist/object-linux",
+    "build-win": "npm run build -- -o ./dist/object-win.exe"
   },
   "pkg": {
     "assets": [
@@ -34,7 +33,7 @@
   "license": "MIT",
   "devDependencies": {
     "@tensorflow-models/coco-ssd": "^2.2.2",
-    "@tensorflow/tfjs-node": "3.11.0",
+    "@tensorflow/tfjs-node": "^3.11.0",
     "axios": "^0.24.0",
     "dotenv": "^10.0.0",
     "form-data": "^4.0.0",
