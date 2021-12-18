@@ -1,32 +1,28 @@
 {
   "name": "object",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "object detection and webhook alerts using tensorflow-js coco-ssd",
   "main": "./lib/index.js",
   "bin": {
     "object": "./bin/object.js"
   },
   "engines": {
-    "npm": "^6.14.4 || ^8.2.0",
-    "node": ">=12.0.0 <15.0.0"
+    "npm": ">=7.0.0",
+    "node": ">=14.0.0 <17.0.0"
   },
   "scripts": {
-    "prebuild": "npm install --development",
-    "build": "npx pkg . --compress Brotli",
-    "postbuild": "npm i --production --package-lock-only && npm shrinkwrap"
+    "prebuild": "npm install --development && npm rebuild @tensorflow/tfjs-node --build-from-source",
+    "build": "pkg . --compress Brotli",
+    "postbuild": "npm i --production --package-lock-only && npm shrinkwrap",
+    "build-linux": "npm run build -- -t node16-linux-x64 -o ./dist/object-linux",
+    "build-win": "npm run build -- -t node16-win-x64 -o ./dist/object-win.exe"
   },
   "pkg": {
     "assets": [
-      "node_modules/@jimp/plugin-print/fonts/open-sans/open-sans-16-white/open-sans-16-white.fnt",
-      "node_modules/@jimp/plugin-print/fonts/open-sans/open-sans-16-white/open-sans-16-white.png",
-      "node_modules/@tensorflow/tfjs-node/lib/napi-v8/tensorflow.dll",
-      "node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node"
-    ],
-    "targets": [
-      "node12-linux",
-      "node12-win"
-    ],
-    "outputPath": "dist"
+      "./node_modules/@jimp/plugin-print/fonts/open-sans/open-sans-16-white/open-sans-16-white.fnt",
+      "./node_modules/@jimp/plugin-print/fonts/open-sans/open-sans-16-white/open-sans-16-white.png",
+      "./node_modules/@tensorflow/tfjs-node/lib/napi-v8/**"
+    ]
   },
   "repository": {
     "type": "git",
@@ -36,7 +32,7 @@
   "license": "MIT",
   "devDependencies": {
     "@tensorflow-models/coco-ssd": "^2.2.2",
-    "@tensorflow/tfjs-node": "^3.11.0",
+    "@tensorflow/tfjs-node": "3.11.0",
     "axios": "^0.24.0",
     "dotenv": "^10.0.0",
     "form-data": "^4.0.0",
