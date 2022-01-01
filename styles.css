@@ -1,0 +1,18 @@
+.fixPosition {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.fixPosition2 {
+    position: fixed;
+    top: 1000;
+    left: 0;
+}
+
+.fixPosition3 {
+    position: fixed;
+    top: 2000;
+    left: 0;
+}
+  
