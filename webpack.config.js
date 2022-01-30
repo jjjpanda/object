@@ -1,7 +1,12 @@
-require("dotenv").config()
 const path = require("path")
+require('dotenv').config({
+    path: path.join(process.cwd(), ".env")
+})
+const webpack = require('webpack')
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const Dotenv = require("dotenv-webpack")
+
+console.log("ENV:", path.join(process.cwd(), ".env"))
 
 module.exports = {
 	mode: process.env.NODE_ENV,
@@ -42,6 +47,11 @@ module.exports = {
 			chunks : ["app"],
 			filename: "app.html"
 		}),
-		new Dotenv()
+		new Dotenv({
+			path: path.join(process.cwd(), ".env")
+		}),
+		new webpack.ProvidePlugin({
+			process: 'process/browser',
+		}),
 	]
 }
