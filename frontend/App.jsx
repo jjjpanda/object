@@ -12,7 +12,11 @@ const App = () => {
     return <Object url={url} />
   })
 
-  return feeds
+  return (
+    <div>
+      {feeds}
+    </div>
+  )
 }
 
 ReactDOM.render(<App />,

@@ -4,19 +4,22 @@ import ReactHlsPlayer from "react-hls-player"
 
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import "@tensorflow/tfjs";
+import axios from "axios";
 
 const Object = (props) => {
   const [key, setKey] = useState(1);
+  const [cachedModel, setCachedModel] = useState(undefined);
+  const [pulsar, setPulsar] = useState(undefined);
+
   const videoRef = useRef();
   const canvasRef = useRef();
 
-  useEffect(() => {
-    console.log("SET UP")
-    setInterval(() => {
-      window.location.reload()
-    }, 1000*60*10)
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-     /*  const webCamPromise = navigator.mediaDevices
+  const loadModel = () => cachedModel != undefined ? new Promise(resolve => {
+    console.log("SETTINGS CHANGED COCOSSD SETUP COMPLETE")
+    resolve(cachedModel)
+  }) : cocoSsd.load();
+
+  const generateWebCamPromise = () => navigator.mediaDevices && navigator.mediaDevices.getUserMedia ? navigator.mediaDevices
         .getUserMedia({
           audio: false,
           video: {
@@ -31,47 +34,51 @@ const Object = (props) => {
               resolve();
             };
           });
-        }); */
-      const liveStreamPromise =  new Promise((resolve) => {
-        if(videoRef && "current" in videoRef){
-          videoRef.current.onloadeddata = (event) => {
-            console.log("EVENT", event, event.eventPhase, videoRef.current, videoRef.current.readyState )
-            resolve([videoRef, event]);
-          };
-        }
-      });
-      const modelPromise = cocoSsd.load();
-      Promise.all([modelPromise, liveStreamPromise])
-        .then(values => {
-          videoRef.current.onloadeddata = () => {}
-          console.log(values)
-          detectFrame(videoRef.current, values[0]);
-        })
-        .catch(error => {
-          console.error(error);
-        });
+        }) : null;
+
+  const generateLiveStreamPromise = () => new Promise((resolve, reject) => {
+    console.log("SETTING UP LIVESTREAM")
+    if(videoRef && "current" in videoRef){
+      videoRef.current.onloadeddata = (event) => {
+        console.log("LIVESTREAM SETUP COMPLETE", event.eventPhase, videoRef.current, videoRef.current.readyState )
+        videoRef.current.onloadeddata = () => {}
+        resolve(event);
+      };
     }
+  });
+
+  useEffect(() => {
+    console.log("SET UP")
+    clearInterval(pulsar);
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000*60*10)
+    Promise.all([loadModel(), generateLiveStreamPromise()])
+      .then(values => {
+        console.log("SET UP COMPLETE")
+        setPulsar(setInterval(() => {
+          axios.post("/object/status/up")
+        }, 1000 * 60 * 0.5))
+        console.log(values)
+        setCachedModel(values[0])
+        detectFrame(videoRef.current, values[0]);
+      })
+      .catch(error => {
+        axios.post("/object/status/down")
+        console.error(error);
+      });
   }, [key])
-
-  const extractFrameImage = (video) => {
-    const canvas = document.createElement("canvas")
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
-    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    return canvas.toDataURL();
-  }
 
   const detectFrame = (video, model) => {
     if(video.readyState == 4){
       model.detect(video).then(predictions => {
-        //console.log(extractFrameImage(video))
+        analyzePredictions(video, predictions)
         
-        renderPredictions(predictions);
         requestAnimationFrame(() => {
           detectFrame(video, model);
         });
       }).catch((e) => {
+        axios.post("/object/status/down")
         console.log(e)
       });
     }
@@ -80,6 +87,30 @@ const Object = (props) => {
       setKey(key + 1)
     }
   };
+
+  const analyzePredictions = (vid, preds) => {
+    if(preds.length > 0){
+      console.log("PREDICTIONS", preds)
+    }
+    const peopleFilteredPred = preds.filter((pred) => pred.class == "person" && pred.score >= process.env.object_minimumConfidence)
+    if(peopleFilteredPred.length > 0) {
+      //const dataUrl = extractFrameImage(vid)
+      axios.post("/object/database", {
+        //dataUrl,
+        predictions: peopleFilteredPred
+      })
+    }
+    renderPredictions(preds);
+  }
+
+  const extractFrameImage = (v) => {
+    const canvas = document.createElement("canvas")
+    canvas.width = v.videoWidth
+    canvas.height = v.videoHeight
+    canvas.getContext('2d').drawImage(v, 0, 0, canvas.width, canvas.height);
+
+    return canvas.toDataURL("image/jpeg", 0.1);
+  }
 
   const renderPredictions = predictions => {
     const ctx = canvasRef.current.getContext("2d");
@@ -92,7 +123,6 @@ const Object = (props) => {
     ctx.font = font;
     ctx.textBaseline = "top";
     predictions.forEach(prediction => {
-      console.log("PREDICTION", prediction)
       const x = prediction.bbox[0];
       const y = prediction.bbox[1];
       const width = prediction.bbox[2];
@@ -132,21 +162,22 @@ const Object = (props) => {
           width="600"
           height="500"
       /> */}
-    <ReactHlsPlayer
+      <ReactHlsPlayer
+        key={key}
         src={props.url}
         autoPlay={true}
         controls={true}
         muted
-        width="1920px"
-        height="1080px"
+        width="800px"
+        height="450px"
         playerRef={videoRef}
         style={{position: "absolute", top: 0, left: 0, zIndex: 1, objectFit: "fill"}}
       />
       <canvas
           className="size"
           ref={canvasRef}
-          width="1920px"
-          height="1080px"
+          width="800px"
+          height="450px"
           style={{position: "absolute", top: 0, left: 0, zIndex: 2}}
       />
     </div>
