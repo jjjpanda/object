@@ -2,14 +2,8 @@ import React, { useEffect, useRef, useState } from "react"
 
 import ReactHlsPlayer from "react-hls-player"
 
-//import * as cocoSsd from "@tensorflow-models/coco-ssd";
-const cocoSsd = {
-  load: () => new Promise(resolve => {
-    resolve({
-      detect: () => new Promise(r => r(Math.random() > 0.999 ? [{bbox: [100,600,100,100], class: "person", score: 0.99}] : []))
-    })
-  })
-}
+import * as cocoSsd from "@tensorflow-models/coco-ssd";
+//import cocoSsd from "./mockCocoSsd.js"
 import "@tensorflow/tfjs";
 import axios from "axios";
 import { similarToAny } from "./PredictionTools";
@@ -98,16 +92,18 @@ const Object = (props) => {
 
   const analyzePredictions = (vid, preds, prevPreds) => {
     if(preds.length > 0){
-      console.log("PREDICTIONS", preds, "PREV", prevPreds)
+      const peopleAndNonRepeatingFilteredPred = preds.filter((pred) => pred.class == "person" && pred.score >= process.env.object_minimumConfidence && !similarToAny(prevPreds, pred))
+      const d = new Date()
+      console.log(`${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}.${d.getMilliseconds()}`, "PREDICTIONS", preds, "PREV", prevPreds, "FILTER", peopleAndNonRepeatingFilteredPred)
+      if(peopleAndNonRepeatingFilteredPred.length > 0) {
+        const dataUrl = extractFrameImage(vid, preds)
+        axios.post("/object/database", {
+          dataUrl,
+          predictions: peopleAndNonRepeatingFilteredPred
+        })
+      }
     }
-    const peopleAndNonRepeatingFilteredPred = preds.filter((pred) => pred.class == "person" && pred.score >= process.env.object_minimumConfidence && !similarToAny(prevPreds, pred))
-    if(peopleAndNonRepeatingFilteredPred.length > 0) {
-      const dataUrl = extractFrameImage(vid, preds)
-      axios.post("/object/database", {
-        dataUrl,
-        predictions: peopleAndNonRepeatingFilteredPred
-      })
-    }
+    
     renderPredictions(canvasRef.current, preds);
   }
 
