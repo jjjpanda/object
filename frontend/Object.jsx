@@ -2,7 +2,14 @@ import React, { useEffect, useRef, useState } from "react"
 
 import ReactHlsPlayer from "react-hls-player"
 
-import * as cocoSsd from "@tensorflow-models/coco-ssd";
+//import * as cocoSsd from "@tensorflow-models/coco-ssd";
+const cocoSsd = {
+  load: () => new Promise(resolve => {
+    resolve({
+      detect: () => new Promise(r => r(Math.random() > 0.999 ? [{bbox: [100,600,100,100], class: "person", score: 0.99}] : []))
+    })
+  })
+}
 import "@tensorflow/tfjs";
 import axios from "axios";
 import { similarToAny } from "./PredictionTools";
@@ -16,7 +23,7 @@ const Object = (props) => {
   const canvasRef = useRef();
 
   const loadModel = () => cachedModel != undefined ? new Promise(resolve => {
-    console.log("SETTINGS CHANGED COCOSSD SETUP COMPLETE")
+    console.log("COCOSSD SETUP COMPLETE")
     resolve(cachedModel)
   }) : cocoSsd.load();
 
@@ -91,31 +98,32 @@ const Object = (props) => {
 
   const analyzePredictions = (vid, preds, prevPreds) => {
     if(preds.length > 0){
-      console.log("PREDICTIONS", preds)
+      console.log("PREDICTIONS", preds, "PREV", prevPreds)
     }
-    const peopleAndNonRepeatingFilteredPred = preds.filter((pred) => pred.class == "person" && pred.score >= process.env.object_minimumConfidence && similarToAny(prevPreds, pred))
+    const peopleAndNonRepeatingFilteredPred = preds.filter((pred) => pred.class == "person" && pred.score >= process.env.object_minimumConfidence && !similarToAny(prevPreds, pred))
     if(peopleAndNonRepeatingFilteredPred.length > 0) {
-      const dataUrl = extractFrameImage(vid)
+      const dataUrl = extractFrameImage(vid, preds)
       axios.post("/object/database", {
         dataUrl,
         predictions: peopleAndNonRepeatingFilteredPred
       })
     }
-    renderPredictions(preds);
+    renderPredictions(canvasRef.current, preds);
   }
 
-  const extractFrameImage = (v) => {
+  const extractFrameImage = (v, p) => {
     const canvas = document.createElement("canvas")
     canvas.width = v.videoWidth
     canvas.height = v.videoHeight
     canvas.getContext('2d').drawImage(v, 0, 0, canvas.width, canvas.height);
+    renderPredictions(canvas, p, false)
 
     return canvas.toDataURL("image/jpeg", 0.1);
   }
 
-  const renderPredictions = predictions => {
-    const ctx = canvasRef.current.getContext("2d");
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  const renderPredictions = (canvas, predictions, clear=true) => {
+    const ctx = canvas.getContext("2d");
+    if(clear) ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.strokeStyle = "#00FFFF";
     ctx.lineWidth = 4;
     ctx.strokeRect(0, 0, 10, 10)
