@@ -5,6 +5,7 @@ import ReactHlsPlayer from "react-hls-player"
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import "@tensorflow/tfjs";
 import axios from "axios";
+import { similarToAny } from "./PredictionTools";
 
 const Object = (props) => {
   const [key, setKey] = useState(1);
@@ -69,13 +70,13 @@ const Object = (props) => {
       });
   }, [key])
 
-  const detectFrame = (video, model) => {
+  const detectFrame = (video, model, previousPredictions=[]) => {
     if(video.readyState == 4){
       model.detect(video).then(predictions => {
-        analyzePredictions(video, predictions)
+        analyzePredictions(video, predictions, previousPredictions)
         
         requestAnimationFrame(() => {
-          detectFrame(video, model);
+          detectFrame(video, model, predictions);
         });
       }).catch((e) => {
         axios.post("/object/status/down")
@@ -88,16 +89,16 @@ const Object = (props) => {
     }
   };
 
-  const analyzePredictions = (vid, preds) => {
+  const analyzePredictions = (vid, preds, prevPreds) => {
     if(preds.length > 0){
       console.log("PREDICTIONS", preds)
     }
-    const peopleFilteredPred = preds.filter((pred) => pred.class == "person" && pred.score >= process.env.object_minimumConfidence)
-    if(peopleFilteredPred.length > 0) {
-      //const dataUrl = extractFrameImage(vid)
+    const peopleAndNonRepeatingFilteredPred = preds.filter((pred) => pred.class == "person" && pred.score >= process.env.object_minimumConfidence && similarToAny(prevPreds, pred))
+    if(peopleAndNonRepeatingFilteredPred.length > 0) {
+      const dataUrl = extractFrameImage(vid)
       axios.post("/object/database", {
-        //dataUrl,
-        predictions: peopleFilteredPred
+        dataUrl,
+        predictions: peopleAndNonRepeatingFilteredPred
       })
     }
     renderPredictions(preds);
