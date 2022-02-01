@@ -11,6 +11,7 @@
     "node": ">=14.0.0 <17.0.0"
   },
   "scripts": {
+    "postinstall": "webpack",
     "build": "webpack --progress",
     "buildCont": "webpack --progress --watch"
   },

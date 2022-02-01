@@ -25,7 +25,23 @@ module.exports = {
 			{
 				test: /\.jsx?$/,
 				exclude: [/node_modules/],
-				loader: "babel-loader"
+				use: {
+					loader: "babel-loader",
+					options: {
+						"presets": [
+							"@babel/preset-env",
+							"@babel/preset-react"
+						],
+						"plugins": [
+							"@babel/plugin-proposal-class-properties",
+							"@babel/plugin-transform-runtime"
+						],
+						"only": [
+							"./frontend",
+							"./dist"
+						]
+					}
+				}
 			},
 			{
 				test: /\.css$/,
@@ -33,11 +49,23 @@ module.exports = {
 			},
 			{
 				test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-				use: [
-					{
-						loader: "babel-loader",
+				use: {
+					loader: "babel-loader",
+					options: {
+						"presets": [
+							"@babel/preset-env",
+							"@babel/preset-react"
+						],
+						"plugins": [
+							"@babel/plugin-proposal-class-properties",
+							"@babel/plugin-transform-runtime"
+						],
+						"only": [
+							"./frontend",
+							"./dist"
+						]
 					}
-				],
+				}
 			}
 		]
 	},
