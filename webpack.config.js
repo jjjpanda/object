@@ -24,7 +24,6 @@ module.exports = {
 		rules: [
 			{
 				test: /\.jsx?/,
-				exclude: [/node_modules/],
 				use: {
 					loader: "babel-loader",
 					options: {
@@ -37,8 +36,7 @@ module.exports = {
 							"@babel/plugin-transform-runtime"
 						],
 						"only": [
-							"./frontend",
-							"./dist"
+							path.resolve(__dirname, "./frontend"),
 						]
 					}
 				}
@@ -59,10 +57,6 @@ module.exports = {
 						"plugins": [
 							"@babel/plugin-proposal-class-properties",
 							"@babel/plugin-transform-runtime"
-						],
-						"only": [
-							"./frontend",
-							"./dist"
 						]
 					}
 				}
