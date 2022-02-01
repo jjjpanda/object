@@ -1,13 +1,12 @@
 {
   "name": "object",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "lockfileVersion": 2,
   "requires": true,
   "packages": {
     "": {
       "name": "object",
-      "version": "3.0.1",
-      "hasInstallScript": true,
+      "version": "3.0.2",
       "license": "MIT",
       "dependencies": {
         "@tensorflow-models/coco-ssd": "^2.2.2",
@@ -27,6 +26,7 @@
         "style-loader": "^3.3.1"
       },
       "bin": {
+        "buildObject": "bin/buildObject.js",
         "object": "bin/object.js"
       },
       "devDependencies": {
