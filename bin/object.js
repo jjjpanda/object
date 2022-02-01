@@ -7,6 +7,5 @@ prepareDatabase(() => {
     })
 })
 
-
 //const object = require('../lib/legacy/index.js').object
 //object(...process.argv.slice(2))
