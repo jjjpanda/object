@@ -1,6 +1,6 @@
 {
   "name": "object",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "object detection and webhook alerts using tensorflow-js coco-ssd",
   "main": "./lib/index.js",
   "bin": {
