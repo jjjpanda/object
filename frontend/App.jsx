@@ -4,12 +4,14 @@ import Object from "./Object"
 
 const App = () => {
   let urls = []
+  let cameras = []
   try{
     urls = JSON.parse(process.env.object_CAMERA_URLS)
+    cameras = JSON.parse(process.env.camera)
   } catch(e){ }
 
-  let feeds = urls.map((url) => {
-    return <Object url={url} />
+  let feeds = urls.map((url, index) => {
+    return <Object url={url} camera={cameras[index]} cameraNumber={index+1} />
   })
 
   return (

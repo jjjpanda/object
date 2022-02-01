@@ -98,6 +98,8 @@ const Object = (props) => {
       if(peopleAndNonRepeatingFilteredPred.length > 0) {
         const dataUrl = extractFrameImage(vid, preds)
         axios.post("/object/database", {
+          camera: props.camera,
+          cameraNumber: props.cameraNumber,
           dataUrl,
           predictions: peopleAndNonRepeatingFilteredPred
         })
