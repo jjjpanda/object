@@ -7,7 +7,7 @@ const App = () => {
   let cameras = []
   try{
     urls = JSON.parse(process.env.object_CAMERA_URLS)
-    cameras = JSON.parse(process.env.camera)
+    cameras = JSON.parse(process.env.cameras)
   } catch(e){ }
 
   let feeds = urls.map((url, index) => {
