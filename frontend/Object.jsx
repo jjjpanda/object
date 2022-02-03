@@ -159,7 +159,7 @@ const Object = (props) => {
   }
   
   return (
-    <div style={{position: 'relative'}}>
+    <div style={{position: 'relative', width: "800px", height: "450px"}}>
       {/* <video
           className="size"
           autoPlay

@@ -11,7 +11,10 @@ const App = () => {
   } catch(e){ }
 
   let feeds = urls.map((url, index) => {
-    return <Object url={url} camera={cameras[index]} cameraNumber={index+1} />
+    return <div>
+      <Object url={url} camera={cameras[index]} cameraNumber={index+1} />
+      <br />
+    </div>
   })
 
   return (
