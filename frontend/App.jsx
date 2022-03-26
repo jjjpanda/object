@@ -20,6 +20,7 @@ const App = () => {
   return (
     <div>
       {feeds}
+      {/* <Object url={"webcam"} camera={"webcam"} cameraNumber={1}/> */}
     </div>
   )
 }

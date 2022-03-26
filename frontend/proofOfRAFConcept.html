@@ -1,0 +1,42 @@
+<div>bruh</div>
+<script>
+    var timer;
+    
+    if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+    }
+
+    var date = new Date();
+    const doCode = () => {
+        var tempDate;
+        tempDate = new Date();
+        if(tempDate - date > 1000){
+            date = tempDate
+            console.log(date, "BRUH")
+        }
+
+    }
+
+    requestAnimationFrame(function again() {
+        if (timer === "paused") {
+            return;
+        }
+
+        clearTimeout(timer);
+
+        timer = setTimeout(function () {
+            timer = "paused";
+            console.log(new Date(), "you unfocused the window");
+
+            requestAnimationFrame(function () {
+                timer = null;
+                console.log(new Date(), "you re-opened the window");
+                requestAnimationFrame(again);
+            });
+        }, 1e3);
+        
+        doCode()
+
+        requestAnimationFrame(again);
+    });
+</script>

@@ -1,15 +1,26 @@
 const similarToAny = (previousPredictions, singlePrediction) => {
-    let similar = false;
+    let i = 0
     for(const previousPrediction of previousPredictions){
-        if(samePosition(previousPrediction.bbox, singlePrediction.bbox)){
-            similar = true
-            break
-        } 
+        const sameThing = previousPrediction.class == singlePrediction.class
+        const samePlace = samePosition(previousPrediction.bbox, singlePrediction.bbox)
+        const sameTime = timestampWithin(previousPrediction, 5*60*1000)
+        if( sameThing && sameTime /**&& samePlace */ ){
+            return i
+        } else {
+            console.log({
+                previousPrediction,
+                singlePrediction,
+                samePlace,
+                sameTime,
+                sameThing
+            })
+            i++
+        }
     }
-    return similar
+    return -1
 }
 
-const samePosition = (previousBoundingBox, currentBoundingBox, sizeTolerance=0.1, positionTolerance=0.1) => {
+const samePosition = (previousBoundingBox, currentBoundingBox, sizeTolerance=0.25, positionTolerance=0.25) => {
     const previousBoxArea = boxArea(previousBoundingBox)
     const currentBoxArea = boxArea(currentBoundingBox)
     
@@ -18,6 +29,10 @@ const samePosition = (previousBoundingBox, currentBoundingBox, sizeTolerance=0.1
     const yIsSimilar = isSimilar(previousBoundingBox.y, currentBoundingBox.y, positionTolerance)
 
     return ( areaIsSimilar && xIsSimilar && yIsSimilar ) 
+}
+
+const timestampWithin = ({timestamp}, millis) => {
+    return timestamp && new Date() - timestamp <= millis;
 }
 
 const boxArea = ({width, height}) => {

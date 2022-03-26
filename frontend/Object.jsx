@@ -55,7 +55,7 @@ const Object = (props) => {
     setTimeout(() => {
       window.location.reload()
     }, 1000*60*10)
-    Promise.all([loadModel(), generateLiveStreamPromise()])
+    Promise.all([loadModel(), props.url == "webcam" ? generateWebCamPromise() : generateLiveStreamPromise() ])
       .then(values => {
         console.log("SET UP COMPLETE")
         setPulsar(setInterval(() => {
@@ -71,13 +71,13 @@ const Object = (props) => {
       });
   }, [key])
 
-  const detectFrame = (video, model, previousPredictions=[]) => {
+  const detectFrame = (video, model, lastSentAt=new Date()) => {
     if(video.readyState == 4){
       model.detect(video).then(predictions => {
-        analyzePredictions(video, predictions, previousPredictions)
+        const newDate = analyzePredictions(video, predictions, lastSentAt)
         
         requestAnimationFrame(() => {
-          detectFrame(video, model, predictions);
+          detectFrame(video, model, newDate);
         });
       }).catch((e) => {
         axios.post("/object/status/down")
@@ -90,11 +90,41 @@ const Object = (props) => {
     }
   };
 
-  const analyzePredictions = (vid, preds, prevPreds) => {
+  const analyzePredictions_legacy = (vid, preds, prevPreds) => {
     if(preds.length > 0){
-      const peopleAndNonRepeatingFilteredPred = preds.filter((pred) => pred.class == "person" && pred.score >= process.env.object_minimumConfidence && !similarToAny(prevPreds, pred))
+      const peopleAndNonRepeatingFilteredPred = []
+      let similarIndexes = []
       const d = new Date()
-      console.log(`${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}.${d.getMilliseconds()}`, "PREDICTIONS", preds, "PREV", prevPreds, "FILTER", peopleAndNonRepeatingFilteredPred)
+
+      for(let pred of preds){
+        let indexOfPrevSimilar = similarToAny(prevPreds, pred)
+        if(pred.class == "person" && pred.score >= process.env.object_minimumConfidence && indexOfPrevSimilar == -1){
+          peopleAndNonRepeatingFilteredPred.push(pred)
+        }
+        pred.timestamp = new Date()
+        pred.score *= 0.95
+        if(indexOfPrevSimilar != -1 && pred.score >= process.env.object_minimumConfidence){
+          similarIndexes.push(indexOfPrevSimilar)
+        }
+      }
+
+      if(peopleAndNonRepeatingFilteredPred.length > 0){
+        console.log(`${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}.${d.getMilliseconds()}`, "PREDICTIONS", [...preds], "PREV", [...prevPreds], "FILTER", [...peopleAndNonRepeatingFilteredPred], "SIMILAR", [...similarIndexes])
+      }
+
+      similarIndexes = new Set(similarIndexes)
+      let i = 0
+      for(let prevPred of prevPreds){
+        if(!similarIndexes.has(i)){
+          prevPred.timestamp=new Date()
+          prevPred.score *= 0.95
+          if(prevPred.score >= process.env.object_minimumConfidence){
+            preds.push(prevPred)
+          }
+        }
+        i++
+      }
+      
       if(peopleAndNonRepeatingFilteredPred.length > 0) {
         const dataUrl = extractFrameImage(vid, preds)
         axios.post("/object/database", {
@@ -107,6 +137,31 @@ const Object = (props) => {
     }
     
     renderPredictions(canvasRef.current, preds);
+  }
+
+  const analyzePredictions = (vid, preds, lastSentAt) => {
+    let filteredPred = []
+    const d = new Date()
+    if(preds.length > 0 && d - lastSentAt > 2500){
+      for(let pred of preds){
+        if(pred.class == "person" && pred.score >= process.env.object_minimumConfidence){
+          filteredPred.push(pred)
+        }
+      }
+    }
+    renderPredictions(canvasRef.current, preds);
+    if(filteredPred.length > 0) {
+      console.log("PREDS", preds, d - lastSentAt, "FILTERS", filteredPred)
+      const dataUrl = extractFrameImage(vid, preds)
+      axios.post("/object/database", {
+        camera: props.camera,
+        cameraNumber: props.cameraNumber,
+        dataUrl,
+        predictions: filteredPred
+      })
+      return d;
+    }
+    return lastSentAt
   }
 
   const extractFrameImage = (v, p) => {
@@ -160,16 +215,15 @@ const Object = (props) => {
   
   return (
     <div style={{position: 'relative', width: "800px", height: "450px"}}>
-      {/* <video
-          className="size"
-          autoPlay
-          playsInline
-          muted
-          ref={videoRef}
-          width="600"
-          height="500"
-      /> */}
-      <ReactHlsPlayer
+      {props.url == "webcam" ? <video
+        className="size"
+        autoPlay
+        playsInline
+        muted
+        ref={videoRef}
+        width="600"
+        height="500"
+      /> : <ReactHlsPlayer
         key={key}
         src={props.url}
         autoPlay={true}
@@ -179,7 +233,7 @@ const Object = (props) => {
         height="450px"
         playerRef={videoRef}
         style={{position: "absolute", top: 0, left: 0, zIndex: 1, objectFit: "fill"}}
-      />
+      />}
       <canvas
           className="size"
           ref={canvasRef}
